@@ -1,30 +1,42 @@
 import React from 'react';
 
 const MeetupContext = React.createContext();
+const UserContext = React.createContext();
 
 const initialState = {
-  title: 'Auth0 Online Meetup',
-  date: Date(),
-  attendees: ['Bob', 'Jessy', 'Christina', 'Adam']
+  meetup: {
+    title: 'Auth0 Online Meetup',
+    date: Date(),
+    attendees: ['Bob', 'Jessy', 'Christina', 'Adam']
+  },
+  user: {
+    name: 'Roy'
+  }
 };
 
 const App = () => (
-  <MeetupContext.Provider value={initialState}>
-    <MeetupContext.Consumer>
-      {props => (
-        <div>
-          <h1>{props.title}</h1>
-          <span>{props.date}</span>
-          <div>
-            <h2>{`Attendees (${props.attendees.length})`}</h2>
-            {props.attendees.map(attendant => (
-              <li>{attendant}</li>
-            ))}
-          </div>
-        </div>
+  <UserContext.Provider value={initialState.user}>
+    <UserContext.Consumer>
+      {user => (
+        <MeetupContext.Provider value={initialState.meetup}>
+          <MeetupContext.Consumer>
+            {meetup => (
+              <div>
+                <h1>{meetup.title}</h1>
+                <span>{meetup.date}</span>
+                <div>
+                  <h2>{`Attendees (${meetup.attendees.length})`}</h2>
+                  {meetup.attendees.map(attendant => (
+                    <li>{attendant}</li>
+                  ))}
+                </div>
+              </div>
+            )}
+          </MeetupContext.Consumer>
+        </MeetupContext.Provider>
       )}
-    </MeetupContext.Consumer>
-  </MeetupContext.Provider>
+    </UserContext.Consumer>
+  </UserContext.Provider>
 );
 
 export default App;
