@@ -1,5 +1,7 @@
 import React from 'react';
+import Auth from './Auth';
 
+const auth = new Auth();
 const MeetupContext = React.createContext();
 const UserContext = React.createContext();
 
@@ -30,9 +32,38 @@ const reducer = (state, action) => {
         ),
         subscribed: false
       };
+    case 'loginUser':
+      return {
+        ...state,
+        isAuthenticated: action.payload.authenticated,
+        name: action.payload.user.name
+      };
     default:
       return state;
   }
+};
+
+const UserContextProvider = props => {
+  const [state, dispatch] = React.useReducer(reducer, initialState.user);
+  auth.handleAuthentication().then(() => {
+    dispatch({
+      type: 'loginUser',
+      payload: {
+        authenticated: true,
+        user: auth.getProfile()
+      }
+    });
+  });
+  return (
+    <UserContext.Provider
+      value={{
+        ...state,
+        handleLogin: auth.signIn
+      }}
+    >
+      {props.children}
+    </UserContext.Provider>
+  );
 };
 
 const MeetupContextProvider = ({ user, ...props }) => {
@@ -53,7 +84,7 @@ const MeetupContextProvider = ({ user, ...props }) => {
 };
 
 const App = () => (
-  <UserContext.Provider value={initialState.user}>
+  <UserContextProvider>
     <UserContext.Consumer>
       {user => (
         <MeetupContextProvider user={user}>
@@ -65,17 +96,21 @@ const App = () => (
                 <div>
                   <h2>{`Attendees (${meetup.attendees.length})`}</h2>
                   {meetup.attendees.map(attendant => (
-                    <li>{attendant}</li>
+                    <li key={attendant}>{attendant}</li>
                   ))}
                   <p>
-                    {!meetup.subscribed ? (
-                      <button onClick={meetup.handleSubscribe}>
-                        Subscribe
-                      </button>
+                    {user.isAuthenticated ? (
+                      !meetup.subscribed ? (
+                        <button onClick={meetup.handleSubscribe}>
+                          Subscribe
+                        </button>
+                      ) : (
+                        <button onClick={meetup.handleUnSubscribe}>
+                          Unsubscribe
+                        </button>
+                      )
                     ) : (
-                      <button onClick={meetup.handleUnSubscribe}>
-                        Unsubscribe
-                      </button>
+                      <button onClick={user.handleLogin}>Login</button>
                     )}
                   </p>
                 </div>
@@ -85,7 +120,7 @@ const App = () => (
         </MeetupContextProvider>
       )}
     </UserContext.Consumer>
-  </UserContext.Provider>
+  </UserContextProvider>
 );
 
 export default App;
