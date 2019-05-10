@@ -1,26 +1,30 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+const MeetupContext = React.createContext();
+
+const initialState = {
+  title: 'Auth0 Online Meetup',
+  date: Date(),
+  attendees: ['Bob', 'Jessy', 'Christina', 'Adam']
+};
+
+const App = () => (
+  <MeetupContext.Provider value={initialState}>
+    <MeetupContext.Consumer>
+      {props => (
+        <div>
+          <h1>{props.title}</h1>
+          <span>{props.date}</span>
+          <div>
+            <h2>{`Attendees (${props.attendees.length})`}</h2>
+            {props.attendees.map(attendant => (
+              <li>{attendant}</li>
+            ))}
+          </div>
+        </div>
+      )}
+    </MeetupContext.Consumer>
+  </MeetupContext.Provider>
+);
 
 export default App;
